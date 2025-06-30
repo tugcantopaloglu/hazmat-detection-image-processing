@@ -1,6 +1,6 @@
 # Hazardous‑Material Sign & Barrel Detection in a Robotic Environment
 
-This project uses **OpenCV** with the **SIFT** algorithm to detect hazardous‑material symbols (hazmat signs) and coloured barrels (red / blue) in a video file.
+This project uses **OpenCV** with the **SIFT** algorithm to detect hazardous‑material symbols (hazmat signs) and coloured barrels (red / blue) in a video file. There is no YOLO or any framework like that. Only pure image processing.
 
 ---
 
