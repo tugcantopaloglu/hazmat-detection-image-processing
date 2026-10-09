@@ -54,6 +54,14 @@ Run the regression tests from the repository folder after installing requirement
 python -m unittest discover -s tests -v
 ```
 
-Tests use small generated images and an MJPEG video, plus a resized copy of one bundled sign. They cover invalid inputs, sparse matches, snapshot creation and write failures, detection flag resets, unmodified color inputs, and headless command-line operation. They do not establish real-world accuracy or exercise desktop interaction or robotic hardware.
+Tests use small generated images and an MJPEG video, plus a resized copy of one bundled sign. They cover invalid inputs, sparse matches, snapshot creation and write failures, detection flag resets, unmodified color inputs, and headless command-line operation. The CLI regression uses a small generated template to keep this suite fast.
+
+Run the separate bundled-template smoke check to exercise the default template path from another working directory:
+
+```sh
+python tests/smoke_bundled_templates.py
+```
+
+This check loads all 15 bundled templates through the actual CLI and verifies a snapshot from a generated video. It has a 120-second subprocess timeout; slow template loading or a hang fails the check. These tests do not establish real-world accuracy or exercise desktop interaction or robotic hardware.
 
 The existing [MIT license](LICENSE) and author attribution are retained.

@@ -193,7 +193,8 @@ class DetectionTests(unittest.TestCase):
         video_path = self.write_video([red])
         valid_video = subprocess.run(
             [sys.executable, script_path, "--headless", "--frame-interval", "1",
-             "--video", str(video_path), "--output", str(self.output_dir)], cwd=self.root,
+             "--video", str(video_path), "--templates", str(self.templates_dir),
+             "--output", str(self.output_dir)], cwd=self.root,
             capture_output=True, text=True, check=False, timeout=20
         )
         self.assertEqual(valid_video.returncode, 0, valid_video.stderr)
