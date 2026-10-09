@@ -1,53 +1,59 @@
-# Hazardous‑Material Sign & Barrel Detection in a Robotic Environment
+# Hazardous Material Sign and Color Detection
 
-This project uses **OpenCV** with the **SIFT** algorithm to detect hazardous‑material symbols (hazmat signs) and coloured barrels (red / blue) in a video file. There is no YOLO or any framework like that. Only pure image processing.
+This OpenCV prototype detects the supplied hazmat sign templates in a video using SIFT features, FLANN matching, and RANSAC homography estimation. It also finds red and blue regions using HSV thresholds and contour area filtering. It uses no learned model or downloaded weights.
 
----
+Color regions are labeled as barrels by the original application, but the algorithm does not verify barrel shape or hazardous contents. The repository includes 15 PNG templates and a sample `video.mp4`. These assets are retained unchanged; they are not a labeled evaluation dataset, and no detection accuracy is established.
 
-## Requirements
+## Installation
 
-- Python 3.x  
-- OpenCV → `opencv-contrib-python`  
-- NumPy  
+Use a Python environment compatible with the selected OpenCV and NumPy wheels. From the repository folder:
 
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
+```sh
+python -m venv .venv
 ```
 
----
+Activate it with `.venv\Scripts\Activate.ps1` in PowerShell or `source .venv/bin/activate` on Linux/macOS, then install:
 
-## Folder Structure
-
-```
-main.py
-video.mp4
-detections/        # Frames with detections will be saved here
-hazmats/           # Template PNG files (hazmat symbols)
+```sh
+python -m pip install -r requirements.txt
 ```
 
----
+The requirements select one OpenCV package, `opencv-contrib-python`, which includes the main modules. Do not install another OpenCV wheel in the same environment: these packages share the `cv2` namespace. See the [OpenCV package installation guidance](https://pypi.org/project/opencv-contrib-python/#installation-and-usage).
 
 ## Usage
 
-1. Place PNG templates of the hazmat signs you want to detect inside the `hazmats/` folder.  
-2. Put the video you want to analyse in the project root as `video.mp4`.  
-3. Run the script:
+```sh
+python main.py
+```
 
-   ```bash
-   python main.py
-   ```
+The script prompts for a positive frame interval; press Enter for 20. It processes frame 0 and every Nth frame after that, shows the video in an OpenCV window, and pauses on each newly detected label. Press any key to continue after a detection, or Escape during normal playback to stop. Desktop mode requires an available graphical display.
 
-4. When prompted, enter the frame interval (e.g. **20**) or press *Enter* to accept the default (recommended) value.  
-5. Detected objects are shown on‑screen and saved to the `detections/` folder.  
-   Press any key to continue after each displayed detection.  
-   *(If the folder does not exist, nothing is saved.)*
+Bundled video and template paths, and the default `detections/` output folder, are resolved relative to `main.py`, so launching the script from another folder works. Explicit relative paths are resolved against your current working directory.
 
----
+```sh
+python main.py --video ./input.avi --templates ./hazmats --output ./results --frame-interval 10
+```
 
-## Notes
+For processing without windows, prompts, or keypresses:
 
-- A screenshot is taken for every detected object and written to `detections/`.  
-- Red and blue barrels are detected via colour‑based segmentation.  
-- Hazmat symbols are detected using **SIFT** keypoint matching and template matching.
+```sh
+python main.py --video ./input.avi --frame-interval 20 --headless
+```
+
+Headless mode uses interval 20 when `--frame-interval` is omitted. `python main.py --help` lists all options. A missing video, an unusable template folder, a nonpositive interval, or a failed snapshot write produces an error and a nonzero exit status.
+
+The output folder is created automatically. Annotated PNG snapshots use `hazard_<label>_<frame>.png` for signs and `varil_<label>_<frame>.png` for color regions. The existing color labels are `Kirmizi Varil` (red) and `Mavi Varil` (blue). A snapshot is saved when a label first appears or reappears after being absent from a processed frame. Repeated objects with the same label in one frame share that label's detection flag. Running the same input again into the same folder can overwrite matching snapshot filenames.
+
+## Detection limits and validation
+
+SIFT matching depends on visible template features, scale, lighting, perspective, and image quality. Fixed color thresholds can flag unrelated red or blue objects. Frame sampling can miss brief appearances. Both detectors examine the original frame before annotations are drawn. This prototype does not establish suitability for robot navigation or safety decisions.
+
+Run the regression tests from the repository folder after installing requirements:
+
+```sh
+python -m unittest discover -s tests -v
+```
+
+Tests use small generated images and an MJPEG video, plus a resized copy of one bundled sign. They cover invalid inputs, sparse matches, snapshot creation and write failures, detection flag resets, unmodified color inputs, and headless command-line operation. They do not establish real-world accuracy or exercise desktop interaction or robotic hardware.
+
+The existing [MIT license](LICENSE) and author attribution are retained.
