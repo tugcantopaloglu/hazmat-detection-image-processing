@@ -54,7 +54,7 @@ Run the regression tests from the repository folder after installing requirement
 python -m unittest discover -s tests -v
 ```
 
-Tests use small generated images and an MJPEG video, plus a resized copy of one bundled sign. They cover invalid inputs, sparse matches, snapshot creation and write failures, detection flag resets, unmodified color inputs, and headless command-line operation. The CLI regression uses a small generated template to keep this suite fast.
+Tests use small generated images and an MJPEG video, plus a resized copy of one bundled sign. They cover invalid inputs, sparse matches, snapshot creation and write failures, detection flag resets, unmodified color inputs, and headless command-line operation. The CLI regression uses a small generated template to keep this suite fast. Fixture subprocesses set OpenMP/BLAS thread limits to 1 within their own environments.
 
 Run the separate bundled-template smoke check to exercise the default template path from another working directory:
 

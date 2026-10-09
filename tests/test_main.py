@@ -1,5 +1,6 @@
 import contextlib
 import io
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -25,6 +26,8 @@ class DetectionTests(unittest.TestCase):
         )
         self.assertTrue(cv2.imwrite(str(self.templates_dir / "fixture.png"), self.template))
         self.output_dir = self.root / "new" / "detections"
+        self.cli_environment = dict(os.environ, OMP_NUM_THREADS="1",
+                                    OPENBLAS_NUM_THREADS="1", MKL_NUM_THREADS="1")
 
     def write_video(self, frames):
         video_path = self.root / "fixture.avi"
@@ -171,19 +174,19 @@ class DetectionTests(unittest.TestCase):
         script_path = str(Path(main.__file__).resolve())
         help_result = subprocess.run(
             [sys.executable, script_path, "--help"], cwd=self.root,
-            capture_output=True, text=True, check=False, timeout=20
+            capture_output=True, text=True, check=False, timeout=20, env=self.cli_environment
         )
         self.assertEqual(help_result.returncode, 0, help_result.stderr)
         invalid_interval = subprocess.run(
             [sys.executable, script_path, "--headless", "--frame-interval", "0"], cwd=self.root,
-            capture_output=True, text=True, check=False, timeout=20
+            capture_output=True, text=True, check=False, timeout=20, env=self.cli_environment
         )
         self.assertEqual(invalid_interval.returncode, 2)
         self.assertIn("positive integer", invalid_interval.stderr)
         missing_video = subprocess.run(
             [sys.executable, script_path, "--headless", "--video", str(self.root / "missing.avi"),
              "--templates", str(self.templates_dir)], cwd=self.root,
-            capture_output=True, text=True, check=False, timeout=20
+            capture_output=True, text=True, check=False, timeout=20, env=self.cli_environment
         )
         self.assertEqual(missing_video.returncode, 1)
         self.assertIn("could not be opened", missing_video.stderr)
@@ -195,7 +198,7 @@ class DetectionTests(unittest.TestCase):
             [sys.executable, script_path, "--headless", "--frame-interval", "1",
              "--video", str(video_path), "--templates", str(self.templates_dir),
              "--output", str(self.output_dir)], cwd=self.root,
-            capture_output=True, text=True, check=False, timeout=20
+            capture_output=True, text=True, check=False, timeout=20, env=self.cli_environment
         )
         self.assertEqual(valid_video.returncode, 0, valid_video.stderr)
         self.assertTrue((self.output_dir / "varil_Kirmizi Varil_0.png").is_file())

@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import subprocess
 import sys
 import tempfile
@@ -30,7 +31,9 @@ class BundledTemplateSmoke(unittest.TestCase):
             result = subprocess.run(
                 [sys.executable, str(script_path), "--headless", "--frame-interval", "1",
                  "--video", str(video_path), "--output", str(output_dir)],
-                cwd=root, capture_output=True, text=True, check=False, timeout=120
+                cwd=root, capture_output=True, text=True, check=False, timeout=120,
+                env=dict(os.environ, OMP_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1",
+                         MKL_NUM_THREADS="1")
             )
             elapsed = time.monotonic() - started
             self.assertEqual(result.returncode, 0, result.stderr)
